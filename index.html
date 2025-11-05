@@ -254,6 +254,7 @@
             .success h2 { margin: 12px 0 6px; font-size: 22px; }
             .success p { color: #66737e; }
             .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+        .boba-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 998; overflow: hidden; }
 
             /* Utilities */
             .hide { display: none !important; }
@@ -322,7 +323,7 @@
                     <div class="rowc" style="justify-content: space-between;">
                         <div class="muted" id="boba-text">No</div>
                         <label class="switch" aria-label="Boba pearls toggle">
-                            <input type="checkbox" id="boba-toggle" onchange="document.getElementById('boba-text').textContent = this.checked ? 'Yes' : 'No'; (function(){ const s=checkoutSummaryWithBoba(); document.getElementById('checkout-summary').textContent = `${s.count} item${s.count>1?'s':''} • ₹${s.total}`; renderCheckoutCart(); })()">
+                            <input type="checkbox" id="boba-toggle" onchange="document.getElementById('boba-text').textContent = this.checked ? 'Yes' : 'No'; if(this.checked){ bobaRain(); } (function(){ const s=checkoutSummaryWithBoba(); document.getElementById('checkout-summary').textContent = `${s.count} item${s.count>1?'s':''} • ₹${s.total}`; renderCheckoutCart(); })()">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -349,7 +350,7 @@
                     
                     </div>
                 </div>
-            <div class="sticky-cta">
+            <div class="sticky-cta" id="sticky-cta">
                 <button id="confirm-btn" class="btn btn-primary" style="width:100%; padding:14px 16px; font-size:15px;" onclick="submitOrder()">Confirm Order</button>
             </div>
             </div>
@@ -390,9 +391,11 @@
 
             <!-- Confetti Container -->
             <div id="confetti" class="confetti"></div>
+        <!-- Boba Rain Overlay -->
+        <div id="boba" class="boba-overlay"></div>
         </div>
 
-        <script>
+    <script>
         // Editable Payment constants
             const UPI_ID = '9704332315@ybl';
             const PAYEE_NAME = 'Mocktail Cloud';
@@ -683,6 +686,10 @@
                 $('#upi-hint').style.display = method === 'UPI' ? 'block' : 'none';
                 $('#upi-actions').classList.toggle('hide', method !== 'UPI');
                 $('#qr-section').classList.toggle('hide', method !== 'QR');
+                // Hide confirm button if UPI or QR is chosen (since those sections have their own CTA)
+                const hideConfirm = method === 'UPI' || method === 'QR';
+                const cta = document.getElementById('sticky-cta');
+                if (cta) cta.classList.toggle('hide', hideConfirm);
             }
 
             function openUPILink() {
@@ -741,7 +748,20 @@
             btn.textContent = 'Submitting…';
             btn.disabled = true;
 
-            const orderId = String(Math.floor(100 + Math.random()*900));
+            // Save order to Firebase Firestore
+            let orderId = null;
+            try {
+                if (window.sendOrderToFirestore) {
+                    orderId = await window.sendOrderToFirestore(payload);
+                } else {
+                    throw new Error('Firestore not initialized');
+                }
+            } catch (e) {
+                alert('Could not place order. Try again or choose Pay at Counter.');
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
 
             // If paying via UPI, attempt to open app immediately after submission
             if (paymentMethod === 'UPI') { openUPILink(); }
@@ -809,7 +829,67 @@
                     setTimeout(() => span.remove(), dur + 600);
                 }
             }
+        
+        // Boba rain: colorful pearls falling from the top when boba is enabled
+        function bobaRain() {
+            const layer = document.getElementById('boba');
+            if (!layer) return;
+            const COLORS = ['#6be7ff','#ffd36b','#ff8ab1','#8ee6c9','#a98bff','#ffad6b'];
+            const count = 28;
+            for (let i = 0; i < count; i++) {
+                const pearl = document.createElement('div');
+                const size = 8 + Math.random()*8; // 8-16px
+                pearl.style.position = 'absolute';
+                pearl.style.left = Math.random()*100 + 'vw';
+                pearl.style.top = '-8vh';
+                pearl.style.width = size + 'px';
+                pearl.style.height = size + 'px';
+                pearl.style.borderRadius = '50%';
+                pearl.style.background = COLORS[Math.floor(Math.random()*COLORS.length)];
+                pearl.style.boxShadow = '0 6px 14px rgba(0,0,0,.12)';
+                pearl.style.opacity = '0.95';
+                const dx = (Math.random()*24 - 12);
+                const dur = 3000 + Math.random()*3000; // ultra-slow fall: 3s - 6s
+                pearl.style.transition = `transform ${dur}ms cubic-bezier(.2,.8,.2,1), opacity ${dur}ms`;
+                layer.appendChild(pearl);
+                requestAnimationFrame(() => {
+                    pearl.style.transform = `translate(${dx}vw, 110vh)`;
+                    pearl.style.opacity = '0.06';
+                });
+                setTimeout(() => pearl.remove(), dur + 900);
+            }
+        }
+
+        
         </script>
+
+    <!-- Firebase Firestore integration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+        import { getFirestore, addDoc, collection, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDscdFFAQlo3oYuL1z7jdbGztWfDezXRp8",
+          authDomain: "mocktail-magic.firebaseapp.com",
+          projectId: "mocktail-magic",
+          storageBucket: "mocktail-magic.firebasestorage.app",
+          messagingSenderId: "892746214757",
+          appId: "1:892746214757:web:c0b5c3a22b762e2437058c",
+          measurementId: "G-NS7F6Z8S1T"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expose helper to the global scope for the main script to use
+        window.sendOrderToFirestore = async function(order) {
+            const docRef = await addDoc(collection(db, 'orders'), {
+                ...order,
+                createdAt: serverTimestamp()
+            });
+            return docRef.id;
+        }
+    </script>
     </body>
     </html>
 
