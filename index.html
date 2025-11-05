@@ -123,8 +123,8 @@
                 transition: transform .15s ease;
             }
             .card:active { transform: scale(0.99); }
-            .thumb {
-                height: 120px;
+        .thumb {
+            height: 150px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -132,6 +132,7 @@
                 position: relative;
                 overflow: hidden;
             }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
             .thumb::after {
                 content: "";
                 position: absolute;
@@ -140,7 +141,7 @@
             }
             .info { padding: 12px 12px 10px; }
             .name { font-weight: 600; font-size: 15px; }
-            .desc { font-size: 12px; color: #71808b; margin-top: 4px; min-height: 30px; }
+        .desc { font-size: 12px; color: #71808b; margin-top: 4px; min-height: 40px; }
             .row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
             .price { font-weight: 700; font-size: 15px; }
             .btn {
@@ -174,6 +175,8 @@
                 border: none;
             }
             .fab:active { transform: translateY(1px) scale(0.98); }
+        .fab.wiggle { animation: wiggle .4s ease; }
+        @keyframes wiggle { 0%{ transform: scale(1);} 30%{ transform: scale(1.08);} 60%{ transform: scale(0.96);} 100%{ transform: scale(1);} }
             .badge {
                 position: absolute; top: -4px; right: -4px;
                 background: #ff3f7a;
@@ -234,6 +237,14 @@
             .qr-wrap { background:#fff; border-radius: 16px; box-shadow: var(--shadow); padding: 14px; text-align:center; }
             .qr-wrap img { width: 220px; max-width: 70%; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
             .mini { font-size: 12px; color:#6a7580; }
+
+        /* Toggle switch */
+        .switch { position: relative; width: 56px; height: 32px; display:inline-block; }
+        .switch input { display:none; }
+        .slider { position:absolute; inset:0; background:#e9eef3; border-radius: 999px; transition: background .2s ease; box-shadow: inset 0 0 0 2px #dfe6ec; }
+        .slider::before { content:""; position:absolute; left:4px; top:4px; width:24px; height:24px; background:#fff; border-radius:50%; box-shadow: 0 4px 10px rgba(0,0,0,.12); transition: transform .2s ease; }
+        .switch input:checked + .slider { background: linear-gradient(135deg, #4ed6b1, #2dc6a0); box-shadow:none; }
+        .switch input:checked + .slider::before { transform: translateX(24px); }
 
             /* Success */
             .success {
@@ -306,6 +317,16 @@
                         <div class="label">Notes (optional)</div>
                         <textarea class="input" id="notes" rows="3" placeholder="Less ice? Extra mint?" style="resize:none"></textarea>
                     </div>
+                <div class="field">
+                    <div class="label">Boba pearls?</div>
+                    <div class="rowc" style="justify-content: space-between;">
+                        <div class="muted" id="boba-text">No</div>
+                        <label class="switch" aria-label="Boba pearls toggle">
+                            <input type="checkbox" id="boba-toggle" onchange="document.getElementById('boba-text').textContent = this.checked ? 'Yes' : 'No'; (function(){ const s=checkoutSummaryWithBoba(); document.getElementById('checkout-summary').textContent = `${s.count} item${s.count>1?'s':''} • ₹${s.total}`; renderCheckoutCart(); })()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
                     <div class="field">
                         <div class="label">Payment</div>
                         <div class="pill-row">
@@ -381,11 +402,13 @@
 
             // Data: Drinks
             const DRINKS = [
-                { id: 'sunset', name: 'Sunset Glow 🍍', desc: 'mango + pineapple + fizz', price: 120, emoji: '🌅', grad: 'linear-gradient(135deg,#ffd1e6,#ffe9cf)' },
-                { id: 'blue', name: 'Blue Bliss 💙', desc: 'lemonade + blue curacao + mint', price: 100, emoji: '💧', grad: 'linear-gradient(135deg,#d9f2ff,#e8fff8)' },
-                { id: 'berry', name: 'Berry Dream 🍓', desc: 'strawberry + lime + soda', price: 130, emoji: '🍓', grad: 'linear-gradient(135deg,#ffe3f0,#efe3ff)' },
-                { id: 'tropical', name: 'Tropical Chill 🥥', desc: 'coconut + pineapple + ice', price: 140, emoji: '🏝️', grad: 'linear-gradient(135deg,#e8fff8,#fff6ea)' },
-                { id: 'minty', name: 'Minty Magic 🌿', desc: 'lemon + mint + soda', price: 90, emoji: '🌿', grad: 'linear-gradient(135deg,#d8fff1,#eafcff)' },
+                // Place these files in an `assets/` folder next to index.html
+                { id: 'sunset', name: 'Sunset Glow 🍍', desc: 'mango + pineapple + fizz', price: 80, emoji: '🌅', img: 'assets/lemon-sparkle.png', grad: 'linear-gradient(135deg,#ffd1e6,#ffe9cf)' },
+                { id: 'blue', name: 'Blue Bliss 💙', desc: 'lemonade + blue curacao + mint', price: 80, emoji: '💧', img: 'assets/blue-mint-boba.png', grad: 'linear-gradient(135deg,#d9f2ff,#e8fff8)' },
+                { id: 'berry', name: 'Berry Dream 🍓', desc: 'strawberry + lime + soda', price: 80, emoji: '🍓', img: 'assets/berry-soda.png', grad: 'linear-gradient(135deg,#ffe3f0,#efe3ff)' },
+                { id: 'minty', name: 'Minty Magic 🌿', desc: 'lemon + mint + soda', price: 80, emoji: '🌿', img: 'assets/mojito-mint.png', grad: 'linear-gradient(135deg,#d8fff1,#eafcff)' },
+                { id: 'choco-boba', name: 'Chocolate Boba 🍫', desc: 'rich cocoa + pearls', price: 120, emoji: '🍫', img: 'assets/chocolate boba.png', grad: 'linear-gradient(135deg,#f5e6d3,#ffe0e6)' },
+                { id: 'milk-boba', name: 'Milky Boba 🧋', desc: 'classic milk tea + pearls', price: 120, emoji: '🧋', img: 'assets/milk-boba.jpg', grad: 'linear-gradient(135deg,#f7efe6,#e8fff8)' },
             ];
 
             // State
@@ -403,6 +426,11 @@
             });
 
             function init() {
+                // Clear persisted cart on a fresh tab/session so users don't see old items
+                if (!sessionStorage.getItem('mm_cart_session_started')) {
+                    setCart([]);
+                    sessionStorage.setItem('mm_cart_session_started', '1');
+                }
                 renderMenu();
                 updateCartBadge();
             }
@@ -424,7 +452,7 @@
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
-                        <div class="thumb" style="background:${d.grad}">${d.emoji}</div>
+                        <div class="thumb" style="background:${d.grad}">${d.img ? `<img src="${d.img}" alt="${d.name}" onerror="console.error('Image failed:', this.src); this.onerror=null; var p=this.parentNode; if(p){ p.textContent='${d.emoji.replace(/'/g,"&#39;")}' }" loading="lazy">` : d.emoji}</div>
                         <div class="info">
                             <div class="name">${d.name}</div>
                             <div class="desc">${d.desc}</div>
@@ -468,7 +496,7 @@
                 setTimeout(() => badge.style.transform = 'scale(1)', 150);
             }
 
-        // Fly-to-cart animation from card to FAB
+        // Sleek pastel micro-animation to cart
         function flyToCartFromCard(btnEl, emoji) {
             const card = btnEl.closest('.card');
             const thumb = card ? card.querySelector('.thumb') : null;
@@ -477,25 +505,61 @@
             const fab = document.querySelector('.fab');
             const endRect = fab.getBoundingClientRect();
 
-            const flyer = document.createElement('div');
-            flyer.textContent = emoji || '🛒';
-            flyer.style.position = 'fixed';
-            flyer.style.left = (startRect.left + startRect.width/2) + 'px';
-            flyer.style.top = (startRect.top + startRect.height/2) + 'px';
-            flyer.style.transform = 'translate(-50%, -50%) scale(1)';
-            flyer.style.transition = 'transform 600ms cubic-bezier(.2,.7,.2,1), opacity 600ms';
-            flyer.style.zIndex = '10000';
-            flyer.style.fontSize = '28px';
-            flyer.style.pointerEvents = 'none';
-            document.body.appendChild(flyer);
+            // Main bubble
+            const bubble = document.createElement('div');
+            bubble.style.position = 'fixed';
+            bubble.style.left = (startRect.left + startRect.width/2) + 'px';
+            bubble.style.top = (startRect.top + startRect.height/2) + 'px';
+            bubble.style.width = '18px';
+            bubble.style.height = '18px';
+            bubble.style.borderRadius = '50%';
+            bubble.style.background = 'linear-gradient(135deg,#ffbdd4,#bdf5e6)';
+            bubble.style.boxShadow = '0 8px 18px rgba(0,0,0,.15)';
+            bubble.style.backdropFilter = 'blur(4px)';
+            bubble.style.transform = 'translate(-50%, -50%) scale(1)';
+            bubble.style.transition = 'transform 520ms cubic-bezier(.19,.7,.2,1), opacity 520ms';
+            bubble.style.opacity = '1';
+            bubble.style.zIndex = '10000';
+            bubble.style.pointerEvents = 'none';
+            document.body.appendChild(bubble);
+
+            // Tiny sparkle trail
+            for (let i = 0; i < 3; i++) {
+                const p = document.createElement('div');
+                p.style.position = 'fixed';
+                p.style.left = (startRect.left + startRect.width/2) + 'px';
+                p.style.top = (startRect.top + startRect.height/2) + 'px';
+                const size = 6 + Math.random()*4;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.borderRadius = '50%';
+                p.style.background = '#fff';
+                p.style.boxShadow = '0 4px 12px rgba(0,0,0,.15)';
+                p.style.transform = 'translate(-50%, -50%)';
+                p.style.transition = `transform 540ms cubic-bezier(.2,.7,.2,1), opacity 540ms`;
+                p.style.opacity = '0.9';
+                p.style.zIndex = '9999';
+                document.body.appendChild(p);
+                const offsetX = (Math.random()*30 - 15);
+                const offsetY = (Math.random()*30 - 15);
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
+                    p.style.opacity = '0';
+                });
+                setTimeout(() => p.remove(), 560);
+            }
 
             const dx = (endRect.left + endRect.width/2) - (startRect.left + startRect.width/2);
             const dy = (endRect.top + endRect.height/2) - (startRect.top + startRect.height/2);
             requestAnimationFrame(() => {
-                flyer.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.4)`;
-                flyer.style.opacity = '0.2';
+                bubble.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.6)`;
+                bubble.style.opacity = '0.15';
             });
-            setTimeout(() => flyer.remove(), 700);
+            setTimeout(() => bubble.remove(), 560);
+
+            // Subtle wiggle on the cart
+            fab.classList.add('wiggle');
+            setTimeout(() => fab.classList.remove('wiggle'), 420);
         }
 
             // Bottom sheet
@@ -529,8 +593,8 @@
                     total += line;
                     const row = document.createElement('div');
                     row.className = 'cart-item';
-                    row.innerHTML = `
-                        <div class="ci-thumb" style="background:${d.grad}">${d.emoji}</div>
+                row.innerHTML = `
+                    <div class="ci-thumb" style="background:${d.grad}">${d.img ? `<img src="${d.img}" alt="${d.name}" style="width:46px;height:46px;object-fit:cover;border-radius:12px;" onerror="console.error('Image failed:', this.src); this.onerror=null; var p=this.parentNode; if(p){ p.textContent='${d.emoji.replace(/'/g,"&#39;")}' }">` : d.emoji}</div>
                         <div class="ci-info">
                             <div class="ci-name">${d.name}</div>
                             <div class="ci-sub">₹${d.price} × ${item.qty}</div>
@@ -563,7 +627,7 @@
                 const cart = getCart();
                 if (cart.length === 0) { toggleCart(false); return; }
                 toggleCart(false);
-                const { count, total } = cartSummary();
+                const { count, total } = checkoutSummaryWithBoba();
                 $('#checkout-summary').textContent = `${count} item${count>1?'s':''} • ₹${total}`;
                 renderCheckoutCart();
                 // Set QR visible texts and image
@@ -580,8 +644,9 @@
                 let total = 0;
                 cart.forEach(it => {
                     const d = DRINKS.find(dr => dr.id === it.id);
-                    const line = d.price * it.qty; total += line;
-                    html += `<div class="co-row"><div><div class=\"co-name\">${d.name}</div><div class=\"co-sub\">₹${d.price} × ${it.qty}</div></div><div class=\"co-line\">₹${line}</div></div>`;
+                    const price = effectivePrice(d);
+                    const line = price * it.qty; total += line;
+                    html += `<div class=\"co-row\"><div><div class=\"co-name\">${d.name}</div><div class=\"co-sub\">₹${price} × ${it.qty}</div></div><div class=\"co-line\">₹${line}</div></div>`;
                 });
                 html += `<div class="co-row" style="font-weight:700"><div>Total</div><div class="co-line">₹${total}</div></div>`;
                 list.innerHTML = html;
@@ -592,6 +657,21 @@
                 cart.forEach(it => {
                     const d = DRINKS.find(dr => dr.id === it.id);
                     count += it.qty; total += d.price * it.qty;
+                });
+                return { count, total };
+            }
+            function effectivePrice(drink) {
+                const boba = document.getElementById('boba-toggle')?.checked || false;
+                const isBobaItem = drink.id === 'choco-boba' || drink.id === 'milk-boba';
+                if (boba && !isBobaItem) return 100; // mocktails with boba
+                return drink.price; // base price (80 for mocktails, 120 for boba drinks)
+            }
+            function checkoutSummaryWithBoba() {
+                const cart = getCart();
+                let count = 0, total = 0;
+                cart.forEach(it => {
+                    const d = DRINKS.find(dr => dr.id === it.id);
+                    count += it.qty; total += effectivePrice(d) * it.qty;
                 });
                 return { count, total };
             }
@@ -649,10 +729,12 @@
 
                 const items = cart.map(it => {
                     const d = DRINKS.find(x => x.id === it.id);
-                    return { item: d.name.replace(/ [^ ]+$/,''), qty: it.qty, price: d.price };
+                    const price = effectivePrice(d);
+                    return { item: d.name.replace(/ [^ ]+$/,''), qty: it.qty, price };
                 });
                 const total = items.reduce((a, c) => a + c.price * c.qty, 0);
-                const payload = { name, phone, notes, cart: items, total, payment_method: paymentMethod };
+                const boba = document.getElementById('boba-toggle')?.checked || false;
+                const payload = { name, phone, notes, boba, cart: items, total, payment_method: paymentMethod };
 
             const btn = $('#confirm-btn');
             const originalText = btn.textContent;
