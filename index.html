@@ -1,0 +1,685 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <title>Mocktail Magic</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --pink: #ffd6e7;
+                --mint: #d8fff1;
+                --peach: #ffe7cf;
+                --blue: #d9f2ff;
+                --lav: #efe3ff;
+                --text: #333f4b;
+                --accent: #ff7aa2;
+                --accent-2: #42d1a6;
+                --card: #ffffff;
+                --shadow: 0 10px 30px rgba(0,0,0,0.08);
+                --radius-lg: 18px;
+                --radius-md: 14px;
+                --radius-sm: 12px;
+            }
+
+            * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+            html, body { height: 100%; }
+            body {
+                margin: 0;
+                font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+                color: var(--text);
+                background: linear-gradient(160deg, var(--pink), var(--mint) 60%, var(--peach));
+                background-attachment: fixed;
+            }
+
+            /* App frame (mobile only) */
+            .app {
+                max-width: 480px;
+                margin: 0 auto;
+                min-height: 100dvh;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* Splash */
+            .splash {
+                position: fixed;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, var(--pink), var(--lav));
+                z-index: 9999;
+                transition: opacity .4s ease;
+            }
+            .splash.hide { opacity: 0; pointer-events: none; }
+            .splash-card {
+                background: rgba(255,255,255,0.7);
+                backdrop-filter: blur(8px);
+                padding: 26px 28px;
+                border-radius: 22px;
+                box-shadow: var(--shadow);
+                text-align: center;
+                font-weight: 600;
+            }
+
+            /* Banner */
+            .banner {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: linear-gradient(90deg, #ffeef6, #e8fff8, #fff6ea);
+                padding: 10px 0;
+                overflow: hidden;
+                border-bottom-left-radius: 16px;
+                border-bottom-right-radius: 16px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            }
+            .marquee {
+                white-space: nowrap;
+                display: inline-block;
+                animation: scroll 14s linear infinite;
+                font-weight: 600;
+                color: #5a6671;
+            }
+            @keyframes scroll {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+            }
+
+            /* Header */
+            header {
+                padding: 18px 18px 6px 18px;
+            }
+            .title {
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: 0.2px;
+            }
+            .subtitle {
+                font-size: 13px;
+                color: #6a7580;
+                margin-top: 4px;
+            }
+
+            /* Menu grid */
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+                padding: 12px 16px 92px 16px; /* leave space for FAB */
+            }
+            .card {
+                background: var(--card);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                transition: transform .15s ease;
+            }
+            .card:active { transform: scale(0.99); }
+            .thumb {
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 40px;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(transparent, rgba(255,255,255,0.5));
+            }
+            .info { padding: 12px 12px 10px; }
+            .name { font-weight: 600; font-size: 15px; }
+            .desc { font-size: 12px; color: #71808b; margin-top: 4px; min-height: 30px; }
+            .row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+            .price { font-weight: 700; font-size: 15px; }
+            .btn {
+                background: var(--text);
+                color: #fff;
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: none;
+                font-weight: 600;
+                font-size: 13px;
+                transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
+                box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+            }
+            .btn:active { transform: translateY(1px) scale(0.98); }
+            .btn-primary { background: linear-gradient(135deg, #ff8ab1, #ff6f9a); }
+            .btn-mint { background: linear-gradient(135deg, #4ed6b1, #2dc6a0); }
+            .btn-ghost { background: #fff; color: #26313a; box-shadow: inset 0 0 0 2px #e9eef2; }
+
+            /* Floating Cart */
+            .fab {
+                position: fixed;
+                right: max(16px, calc((100vw - 480px)/2 + 16px));
+                bottom: 20px;
+                background: linear-gradient(135deg, #ff93b6, #ffa6c2);
+                color: #fff;
+                height: 56px; width: 56px;
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                box-shadow: 0 14px 28px rgba(255, 105, 150, 0.35);
+                z-index: 40;
+                border: none;
+            }
+            .fab:active { transform: translateY(1px) scale(0.98); }
+            .badge {
+                position: absolute; top: -4px; right: -4px;
+                background: #ff3f7a;
+                color: #fff; font-size: 11px; font-weight: 700;
+                min-width: 20px; height: 20px; line-height: 20px; text-align: center;
+                border-radius: 12px;
+                box-shadow: 0 6px 14px rgba(255, 67, 125, 0.5);
+                padding: 0 6px;
+            }
+
+            /* Bottom Sheet Cart */
+            .sheet-backdrop {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.18);
+                opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 45;
+            }
+            .sheet { position: fixed; left: 50%; transform: translateX(-50%) translateY(100%);
+                bottom: 0; width: 100%; max-width: 480px; background: #fff;
+                border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,.15);
+                z-index: 50; transition: transform .28s ease; }
+            .sheet.open { transform: translateX(-50%) translateY(0); }
+            .sheet-head { padding: 12px 16px; display:flex; align-items:center; justify-content: center; position: relative; }
+            .grab { width: 44px; height: 5px; background: #e8eef3; border-radius: 6px; }
+            .close-x { position: absolute; right: 12px; top: 8px; border: none; background: transparent; font-size: 22px; color: #6c7782; }
+            .sheet-body { max-height: 55dvh; overflow: auto; padding: 8px 16px 16px; }
+            .cart-item { display:flex; gap: 10px; align-items: center; padding: 10px 4px; border-bottom: 1px dashed #eef2f5; }
+            .ci-thumb { width: 46px; height: 46px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 22px; }
+            .ci-info { flex: 1; }
+            .ci-name { font-weight: 600; font-size: 14px; }
+            .ci-sub { font-size: 12px; color: #7b8792; }
+            .qty { display:flex; align-items:center; gap: 8px; }
+            .qty-btn { width: 28px; height: 28px; border-radius: 10px; border:none; background:#f3f6f9; font-weight:700; font-size:16px; }
+            .ci-price { font-weight: 700; }
+            .sheet-foot { padding: 12px 16px 18px; border-top: 1px solid #f0f4f7; background: #fff; position: sticky; bottom: 0; }
+            .tot-row { display:flex; align-items:center; justify-content: space-between; margin-bottom: 10px; }
+
+            /* Views */
+            .view { display: none; }
+            .view.active { display: block; }
+
+            /* Checkout */
+            .section { padding: 14px 16px 100px; }
+            .field { margin-bottom: 12px; }
+            .label { font-size: 13px; margin-bottom: 6px; font-weight: 600; }
+            .input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid #eef2f6; background: #fff; font-size: 14px; outline: none; transition: border-color .2s ease; }
+            .input:focus { border-color: #ffd0e3; }
+            .pill-row { display:flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+            .pill { padding: 10px 12px; border-radius: 999px; border: 2px solid #e9eef3; background:#fff; font-weight:600; font-size:13px; cursor: pointer; }
+            .pill.active { border-color: #ffc2d9; background: #fff3f8; }
+            .sticky-cta { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; width: calc(100% - 32px); max-width: 448px; z-index: 10; }
+            .checkout-list { background:#fff; border-radius: 16px; box-shadow: var(--shadow); padding: 8px 10px; margin: 8px 0 14px; }
+            .co-row { display:flex; align-items:center; gap: 10px; padding: 10px 6px; border-bottom: 1px dashed #f0f4f7; }
+            .co-row:last-child { border-bottom: 0; }
+            .co-name { font-weight: 600; font-size: 14px; }
+            .co-sub { font-size: 12px; color: #7b8792; }
+            .co-line { margin-left: auto; font-weight: 700; }
+            .pay-cta { margin-top: 8px; }
+            .btn-upi { background: linear-gradient(135deg, #39d2a8, #22c39b); color:#fff; box-shadow: 0 10px 22px rgba(34,195,155,0.35); }
+            .qr-wrap { background:#fff; border-radius: 16px; box-shadow: var(--shadow); padding: 14px; text-align:center; }
+            .qr-wrap img { width: 220px; max-width: 70%; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+            .mini { font-size: 12px; color:#6a7580; }
+
+            /* Success */
+            .success {
+                text-align: center; padding: 40px 16px 120px;
+            }
+            .big-emoji { font-size: 64px; }
+            .success h2 { margin: 12px 0 6px; font-size: 22px; }
+            .success p { color: #66737e; }
+            .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+
+            /* Utilities */
+            .hide { display: none !important; }
+            .soft-card { background: rgba(255,255,255,0.6); border-radius: 16px; backdrop-filter: blur(8px); padding: 10px 12px; }
+            .rowc { display:flex; align-items:center; gap: 10px; }
+            .muted { color: #6f7d88; }
+        </style>
+    </head>
+    <body>
+        <!-- Splash Screen -->
+        <div class="splash" id="splash">
+            <div class="splash-card">
+                <div style="font-size:28px">🍸</div>
+                <div style="margin-top:6px">Mocktail Cloud loading...</div>
+            </div>
+        </div>
+
+        <div class="app">
+            <!-- Scrolling banner -->
+            <div class="banner">
+                <div class="marquee">✨ Fresh mocktails all day ✨ &nbsp; ✨ Hand-shaken pastel sips ✨ &nbsp; ✨ Zero-proof, full joy ✨ &nbsp;</div>
+            </div>
+
+            <!-- Home / Menu View -->
+            <div id="view-menu" class="view active">
+                <header>
+                    <div class="title">Mocktail Magic 🧃</div>
+                    <div class="subtitle">colorful zero-proof drinks, made with love</div>
+                </header>
+                <div class="grid" id="menu-grid"></div>
+            </div>
+
+            <!-- Checkout View -->
+            <div id="view-checkout" class="view">
+                <header>
+                    <div class="title">Checkout</div>
+                    <div class="subtitle">one last step before the sparkle ✨</div>
+                </header>
+                <div class="section">
+                    <div class="soft-card" style="margin-bottom:12px">
+                        <div class="rowc" style="justify-content: space-between;">
+                            <div class="muted" id="checkout-summary">0 items • ₹0</div>
+                            <button class="btn btn-ghost" onclick="navigate('menu')">← Menu</button>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="label">Your Order</div>
+                        <div id="checkout-cart-list" class="checkout-list"></div>
+                    </div>
+
+                    <div class="field">
+                        <div class="label">Name</div>
+                        <input class="input" id="name" placeholder="Your name" />
+                    </div>
+                    <div class="field">
+                        <div class="label">Phone</div>
+                        <input class="input" id="phone" placeholder="10-digit phone" inputmode="numeric" />
+                    </div>
+                    <div class="field">
+                        <div class="label">Notes (optional)</div>
+                        <textarea class="input" id="notes" rows="3" placeholder="Less ice? Extra mint?" style="resize:none"></textarea>
+                    </div>
+                    <div class="field">
+                        <div class="label">Payment</div>
+                        <div class="pill-row">
+                            <button class="pill" id="pay-upi" onclick="selectPayment('UPI')">💸 Pay via UPI</button>
+                            <button class="pill" id="pay-qr" onclick="selectPayment('QR')">🧾 Scan QR to Pay</button>
+                            <button class="pill" id="pay-cash" onclick="selectPayment('CASH')">💵 Pay at Counter</button>
+                        </div>
+                        <div id="upi-hint" class="muted" style="margin-top:8px; font-size:12px; display:none;">We’ll open your UPI app with the amount filled in.</div>
+                        <div id="upi-actions" class="pay-cta hide">
+                            <button class="btn btn-upi" style="width:100%; padding:12px 14px; font-size:15px;" onclick="openUPILink()">💸 Pay via UPI</button>
+                        </div>
+                        <div id="qr-section" class="qr-wrap hide" style="margin-top:12px;">
+                            <img id="qr-image" alt="UPI QR" />
+                            <div style="height:8px"></div>
+                            <div class="mini">UPI ID: <b id="upi-id-text"></b></div>
+                            <div class="mini" id="qr-hint">Scan the QR using any UPI app to pay</div>
+                            <div style="height:10px"></div>
+                            <button class="btn btn-ghost" style="width:100%;" onclick="ivePaid()">✨ I've Paid</button>
+                        </div>
+                    
+                    </div>
+                </div>
+            <div class="sticky-cta">
+                <button id="confirm-btn" class="btn btn-primary" style="width:100%; padding:14px 16px; font-size:15px;" onclick="submitOrder()">Confirm Order</button>
+            </div>
+            </div>
+
+            <!-- Success View -->
+            <div id="view-success" class="view">
+                <div class="success">
+                    <div class="big-emoji">🎉</div>
+                    <h2>yayyy! your drink’s getting ready 🍹</h2>
+                    <p id="success-text">order #— will be ready soon!</p>
+                    <div style="height:12px"></div>
+                    <button class="btn btn-mint" onclick="goHome()">Order more</button>
+                </div>
+            </div>
+
+            <!-- Bottom Sheet Cart -->
+            <div class="sheet-backdrop" id="sheet-backdrop" onclick="toggleCart(false)"></div>
+            <div class="sheet" id="cart-sheet" aria-hidden="true">
+                <div class="sheet-head">
+                    <div class="grab"></div>
+                    <button class="close-x" onclick="toggleCart(false)">×</button>
+                </div>
+                <div class="sheet-body" id="cart-items"></div>
+                <div class="sheet-foot">
+                    <div class="tot-row">
+                        <div class="muted">Total</div>
+                        <div class="price" id="cart-total">₹0</div>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; padding:14px 16px; font-size:15px;" onclick="proceedCheckout()">Proceed to Checkout</button>
+                </div>
+            </div>
+
+            <!-- Floating Cart Button -->
+            <button class="fab" onclick="toggleCart(true)" aria-label="Open cart">
+                🛒
+                <span class="badge" id="cart-badge">0</span>
+            </button>
+
+            <!-- Confetti Container -->
+            <div id="confetti" class="confetti"></div>
+        </div>
+
+        <script>
+        // Editable Payment constants
+            const UPI_ID = 'yourupi@okaxis';
+            const PAYEE_NAME = 'Mocktail Cloud';
+            const PAYMENT_QR_URL = 'link-to-qr-image.png'; // put your QR image path here
+
+        // Backend disabled – orders are stored locally only.
+
+            // Data: Drinks
+            const DRINKS = [
+                { id: 'sunset', name: 'Sunset Glow 🍍', desc: 'mango + pineapple + fizz', price: 120, emoji: '🌅', grad: 'linear-gradient(135deg,#ffd1e6,#ffe9cf)' },
+                { id: 'blue', name: 'Blue Bliss 💙', desc: 'lemonade + blue curacao + mint', price: 100, emoji: '💧', grad: 'linear-gradient(135deg,#d9f2ff,#e8fff8)' },
+                { id: 'berry', name: 'Berry Dream 🍓', desc: 'strawberry + lime + soda', price: 130, emoji: '🍓', grad: 'linear-gradient(135deg,#ffe3f0,#efe3ff)' },
+                { id: 'tropical', name: 'Tropical Chill 🥥', desc: 'coconut + pineapple + ice', price: 140, emoji: '🏝️', grad: 'linear-gradient(135deg,#e8fff8,#fff6ea)' },
+                { id: 'minty', name: 'Minty Magic 🌿', desc: 'lemon + mint + soda', price: 90, emoji: '🌿', grad: 'linear-gradient(135deg,#d8fff1,#eafcff)' },
+            ];
+
+            // State
+            const CART_KEY = 'mm_cart';
+            const ORDERS_KEY = 'mm_orders';
+            let paymentMethod = null; // 'UPI' | 'QR' | 'CASH'
+
+            const $ = sel => document.querySelector(sel);
+            const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+            // Splash
+            window.addEventListener('load', () => {
+                setTimeout(() => { $('#splash').classList.add('hide'); }, 900);
+                init();
+            });
+
+            function init() {
+                renderMenu();
+                updateCartBadge();
+            }
+
+            // SPA Navigation
+            function navigate(view) {
+                $$('.view').forEach(v => v.classList.remove('active'));
+                if (view === 'menu') { $('#view-menu').classList.add('active'); }
+                if (view === 'checkout') { $('#view-checkout').classList.add('active'); }
+                if (view === 'success') { $('#view-success').classList.add('active'); }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Menu rendering
+            function renderMenu() {
+                const grid = $('#menu-grid');
+                grid.innerHTML = '';
+                DRINKS.forEach(d => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="thumb" style="background:${d.grad}">${d.emoji}</div>
+                        <div class="info">
+                            <div class="name">${d.name}</div>
+                            <div class="desc">${d.desc}</div>
+                            <div class="row">
+                                <div class="price">₹${d.price}</div>
+                                <button class="btn btn-ghost" onclick="addToCart('${d.id}')">Add to Cart</button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            // Cart logic
+            function getCart() {
+                try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
+            }
+            function setCart(items) {
+                localStorage.setItem(CART_KEY, JSON.stringify(items));
+            }
+            function addToCart(id) {
+                const cart = getCart();
+                const drink = DRINKS.find(d => d.id === id);
+                if (!drink) return;
+                const existing = cart.find(i => i.id === id);
+                if (existing) existing.qty += 1; else cart.push({ id, qty: 1 });
+                setCart(cart);
+                animateCartBadge();
+                updateCartBadge();
+            }
+            function updateCartBadge() {
+                const cart = getCart();
+                const count = cart.reduce((a, c) => a + c.qty, 0);
+                $('#cart-badge').textContent = count;
+            }
+            function animateCartBadge() {
+                const badge = $('#cart-badge');
+                badge.style.transform = 'scale(1.2)';
+                badge.style.transition = 'transform .15s ease';
+                setTimeout(() => badge.style.transform = 'scale(1)', 150);
+            }
+
+            // Bottom sheet
+            function toggleCart(open) {
+                const sheet = $('#cart-sheet');
+                const backdrop = $('#sheet-backdrop');
+                if (open) {
+                    sheet.classList.add('open');
+                    backdrop.style.opacity = '1';
+                    backdrop.style.pointerEvents = 'auto';
+                    renderCartSheet();
+                } else {
+                    sheet.classList.remove('open');
+                    backdrop.style.opacity = '0';
+                    backdrop.style.pointerEvents = 'none';
+                }
+            }
+            function renderCartSheet() {
+                const container = $('#cart-items');
+                const cart = getCart();
+                if (cart.length === 0) {
+                    container.innerHTML = `<div class="muted" style="text-align:center; padding: 24px 0;">Your cart is empty ☁️</div>`;
+                    $('#cart-total').textContent = '₹0';
+                    return;
+                }
+                container.innerHTML = '';
+                let total = 0;
+                cart.forEach(item => {
+                    const d = DRINKS.find(dr => dr.id === item.id);
+                    const line = d.price * item.qty;
+                    total += line;
+                    const row = document.createElement('div');
+                    row.className = 'cart-item';
+                    row.innerHTML = `
+                        <div class="ci-thumb" style="background:${d.grad}">${d.emoji}</div>
+                        <div class="ci-info">
+                            <div class="ci-name">${d.name}</div>
+                            <div class="ci-sub">₹${d.price} × ${item.qty}</div>
+                        </div>
+                        <div class="qty">
+                            <button class="qty-btn" aria-label="decrease" onclick="decQty('${item.id}')">−</button>
+                            <div>${item.qty}</div>
+                            <button class="qty-btn" aria-label="increase" onclick="incQty('${item.id}')">+</button>
+                        </div>
+                        <div class="ci-price">₹${line}</div>
+                    `;
+                    container.appendChild(row);
+                });
+                $('#cart-total').textContent = `₹${total}`;
+            }
+            function incQty(id) {
+                const cart = getCart();
+                const it = cart.find(i => i.id === id); if (!it) return;
+                it.qty += 1; setCart(cart); updateCartBadge(); renderCartSheet();
+            }
+            function decQty(id) {
+                const cart = getCart();
+                const it = cart.find(i => i.id === id); if (!it) return;
+                it.qty -= 1; if (it.qty <= 0) cart.splice(cart.indexOf(it), 1);
+                setCart(cart); updateCartBadge(); renderCartSheet();
+            }
+
+            // Checkout
+            function proceedCheckout() {
+                const cart = getCart();
+                if (cart.length === 0) { toggleCart(false); return; }
+                toggleCart(false);
+                const { count, total } = cartSummary();
+                $('#checkout-summary').textContent = `${count} item${count>1?'s':''} • ₹${total}`;
+                renderCheckoutCart();
+                // Set QR visible texts and image
+                $('#qr-image').src = PAYMENT_QR_URL;
+                $('#upi-id-text').textContent = UPI_ID;
+                $('#qr-hint').textContent = `Scan the QR using any UPI app to pay ₹${total}`;
+                navigate('checkout');
+            }
+            function renderCheckoutCart() {
+                const list = $('#checkout-cart-list');
+                const cart = getCart();
+                if (cart.length === 0) { list.innerHTML = '<div class="mini">Your cart is empty.</div>'; return; }
+                let html = '';
+                let total = 0;
+                cart.forEach(it => {
+                    const d = DRINKS.find(dr => dr.id === it.id);
+                    const line = d.price * it.qty; total += line;
+                    html += `<div class="co-row"><div><div class=\"co-name\">${d.name}</div><div class=\"co-sub\">₹${d.price} × ${it.qty}</div></div><div class=\"co-line\">₹${line}</div></div>`;
+                });
+                html += `<div class="co-row" style="font-weight:700"><div>Total</div><div class="co-line">₹${total}</div></div>`;
+                list.innerHTML = html;
+            }
+            function cartSummary() {
+                const cart = getCart();
+                let count = 0, total = 0;
+                cart.forEach(it => {
+                    const d = DRINKS.find(dr => dr.id === it.id);
+                    count += it.qty; total += d.price * it.qty;
+                });
+                return { count, total };
+            }
+            function selectPayment(method) {
+                paymentMethod = method;
+                $('#pay-upi').classList.toggle('active', method === 'UPI');
+                $('#pay-qr').classList.toggle('active', method === 'QR');
+                $('#pay-cash').classList.toggle('active', method === 'CASH');
+                $('#upi-hint').style.display = method === 'UPI' ? 'block' : 'none';
+                $('#upi-actions').classList.toggle('hide', method !== 'UPI');
+                $('#qr-section').classList.toggle('hide', method !== 'QR');
+            }
+
+            function openUPILink() {
+                const { total } = cartSummary();
+                const url = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${encodeURIComponent(total)}&cu=INR&tn=${encodeURIComponent('Order Payment')}`;
+                try { window.location.href = url; } catch {}
+                toast('Opening UPI app...');
+            }
+
+            function ivePaid() {
+                if (paymentMethod !== 'QR') selectPayment('QR');
+                toast('Great! We’ll confirm at the counter.');
+            }
+
+            // Confirm Order
+        async function submitOrder() {
+                const name = $('#name').value.trim();
+                const phone = $('#phone').value.replace(/\D/g,'');
+                const notes = $('#notes').value.trim();
+                if (!name) return toast('Please enter your name');
+                if (phone.length < 10) return toast('Enter a valid 10-digit phone');
+                if (!paymentMethod) return toast('Select a payment method');
+
+                const cart = getCart();
+                if (cart.length === 0) return toast('Your cart is empty');
+
+                const items = cart.map(it => {
+                    const d = DRINKS.find(x => x.id === it.id);
+                    return { item: d.name.replace(/ [^ ]+$/,''), qty: it.qty, price: d.price };
+                });
+                const total = items.reduce((a, c) => a + c.price * c.qty, 0);
+                const payload = { name, phone, notes, cart: items, total, payment_method: paymentMethod };
+
+            const btn = $('#confirm-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Submitting…';
+            btn.disabled = true;
+
+            const orderId = String(Math.floor(100 + Math.random()*900));
+
+            // If paying via UPI, attempt to open app immediately after submission
+            if (paymentMethod === 'UPI') { openUPILink(); }
+
+            // Store order locally
+            saveOrder({ id: orderId, ...payload, createdAt: new Date().toISOString() });
+
+            // Clear cart and show success
+            setCart([]); updateCartBadge();
+            $('#success-text').textContent = `order #${orderId} will be ready soon!`;
+            navigate('success');
+            burstConfetti();
+
+            // Reset button for next time
+            btn.textContent = originalText;
+            btn.disabled = false;
+            }
+
+            
+
+            function saveOrder(order) {
+                let list = [];
+                try { list = JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; } catch {}
+                list.unshift(order);
+                localStorage.setItem(ORDERS_KEY, JSON.stringify(list.slice(0, 20)));
+            }
+
+            function goHome() {
+                navigate('menu');
+            }
+
+            // Tiny toast
+            function toast(msg) {
+                const t = document.createElement('div');
+                t.textContent = msg;
+                t.style.position = 'fixed'; t.style.left = '50%'; t.style.transform = 'translateX(-50%)';
+                t.style.bottom = '84px'; t.style.background = '#111a'; t.style.color = '#fff'; t.style.padding = '10px 14px';
+                t.style.borderRadius = '12px'; t.style.fontWeight = '600'; t.style.zIndex = '99999'; t.style.backdropFilter = 'blur(4px)';
+                document.body.appendChild(t);
+                setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .2s'; }, 1200);
+                setTimeout(() => t.remove(), 1500);
+            }
+
+            // Confetti: emoji bursts
+            function burstConfetti() {
+                const container = $('#confetti');
+                container.innerHTML = '';
+                const EMOJIS = ['🍓','🥭','🍍','🍋','🍉','✨','💖','🫧'];
+                const count = 42;
+                for (let i = 0; i < count; i++) {
+                    const span = document.createElement('span');
+                    span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+                    span.style.position = 'absolute';
+                    span.style.left = Math.random()*100 + 'vw';
+                    span.style.top = '-10vh';
+                    span.style.fontSize = (16 + Math.random()*20) + 'px';
+                    const rot = (Math.random()*40 - 20) + 'deg';
+                    const dur = 1200 + Math.random()*1000;
+                    span.style.transition = `transform ${dur}ms cubic-bezier(.2,.6,.2,1), opacity ${dur}ms`;
+                    container.appendChild(span);
+                    requestAnimationFrame(() => {
+                        span.style.transform = `translate(${(Math.random()*60-30)}vw, 110vh) rotate(${rot})`;
+                        span.style.opacity = '0.9';
+                    });
+                    setTimeout(() => span.remove(), dur + 600);
+                }
+            }
+        </script>
+    </body>
+    </html>
+
+
