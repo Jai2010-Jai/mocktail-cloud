@@ -373,7 +373,7 @@
 
         <script>
         // Editable Payment constants
-            const UPI_ID = 'yourupi@okaxis';
+            const UPI_ID = '9704332315@ybl';
             const PAYEE_NAME = 'Mocktail Cloud';
             const PAYMENT_QR_URL = 'link-to-qr-image.png'; // put your QR image path here
 
@@ -430,7 +430,7 @@
                             <div class="desc">${d.desc}</div>
                             <div class="row">
                                 <div class="price">₹${d.price}</div>
-                                <button class="btn btn-ghost" onclick="addToCart('${d.id}')">Add to Cart</button>
+                                <button class="btn btn-ghost" onclick="addToCart('${d.id}', this)">Add to Cart</button>
                             </div>
                         </div>
                     `;
@@ -445,7 +445,7 @@
             function setCart(items) {
                 localStorage.setItem(CART_KEY, JSON.stringify(items));
             }
-            function addToCart(id) {
+        function addToCart(id, btnEl) {
                 const cart = getCart();
                 const drink = DRINKS.find(d => d.id === id);
                 if (!drink) return;
@@ -454,6 +454,7 @@
                 setCart(cart);
                 animateCartBadge();
                 updateCartBadge();
+            try { if (btnEl) flyToCartFromCard(btnEl, drink.emoji); } catch {}
             }
             function updateCartBadge() {
                 const cart = getCart();
@@ -466,6 +467,36 @@
                 badge.style.transition = 'transform .15s ease';
                 setTimeout(() => badge.style.transform = 'scale(1)', 150);
             }
+
+        // Fly-to-cart animation from card to FAB
+        function flyToCartFromCard(btnEl, emoji) {
+            const card = btnEl.closest('.card');
+            const thumb = card ? card.querySelector('.thumb') : null;
+            const startEl = thumb || btnEl;
+            const startRect = startEl.getBoundingClientRect();
+            const fab = document.querySelector('.fab');
+            const endRect = fab.getBoundingClientRect();
+
+            const flyer = document.createElement('div');
+            flyer.textContent = emoji || '🛒';
+            flyer.style.position = 'fixed';
+            flyer.style.left = (startRect.left + startRect.width/2) + 'px';
+            flyer.style.top = (startRect.top + startRect.height/2) + 'px';
+            flyer.style.transform = 'translate(-50%, -50%) scale(1)';
+            flyer.style.transition = 'transform 600ms cubic-bezier(.2,.7,.2,1), opacity 600ms';
+            flyer.style.zIndex = '10000';
+            flyer.style.fontSize = '28px';
+            flyer.style.pointerEvents = 'none';
+            document.body.appendChild(flyer);
+
+            const dx = (endRect.left + endRect.width/2) - (startRect.left + startRect.width/2);
+            const dy = (endRect.top + endRect.height/2) - (startRect.top + startRect.height/2);
+            requestAnimationFrame(() => {
+                flyer.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.4)`;
+                flyer.style.opacity = '0.2';
+            });
+            setTimeout(() => flyer.remove(), 700);
+        }
 
             // Bottom sheet
             function toggleCart(open) {
@@ -576,8 +607,26 @@
 
             function openUPILink() {
                 const { total } = cartSummary();
-                const url = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${encodeURIComponent(total)}&cu=INR&tn=${encodeURIComponent('Order Payment')}`;
-                try { window.location.href = url; } catch {}
+                const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${encodeURIComponent(total)}&cu=INR&tn=${encodeURIComponent('Order Payment')}`;
+                const gpay = `tez://upi/pay?${params}`; // Google Pay scheme
+                const phonepe = `phonepe://pay?${params}`; // PhonePe scheme
+                const generic = `upi://pay?${params}`;
+
+                let attempted = false;
+                const tryOpen = (url) => {
+                    attempted = true;
+                    try { window.location.href = url; } catch {}
+                };
+
+                // Attempt GPay, then PhonePe, then generic UPI
+                tryOpen(gpay);
+                setTimeout(() => {
+                    if (!attempted) return;
+                    tryOpen(phonepe);
+                }, 600);
+                setTimeout(() => {
+                    tryOpen(generic);
+                }, 1200);
                 toast('Opening UPI app...');
             }
 
