@@ -159,6 +159,45 @@
             .btn-primary { background: linear-gradient(135deg, #ff8ab1, #ff6f9a); }
             .btn-mint { background: linear-gradient(135deg, #4ed6b1, #2dc6a0); }
             .btn-ghost { background: #fff; color: #26313a; box-shadow: inset 0 0 0 2px #e9eef2; }
+            /* Add-to-cart success animation */
+            @keyframes addedPop { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+            .btn.added {
+                background: linear-gradient(135deg, #4ed6b1, #2dc6a0);
+                box-shadow: 0 10px 22px rgba(34,195,155,0.35);
+                animation: addedPop .28s ease;
+            }
+
+            /* Builder card */
+            .builder-card .thumb { height: 150px; }
+            .builder-stage { position: relative; width: 100%; height: 100%; }
+            .builder-glass { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 52px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.12)); }
+            .builder-ring { position: absolute; left: 50%; top: 50%; width: 210px; height: 210px; margin-left: -105px; margin-top: -105px; }
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            .builder-caption { position:absolute; left:50%; bottom: 10px; transform: translateX(-50%); font-size: 12px; font-weight: 700; color:#344; background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 999px; box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+            /* Main card: gentle glass float, no orbit */
+            .builder-card .builder-ring { animation: none; }
+            @keyframes floatGlassCard { 0% { transform: translate(-50%, -50%) translateY(0); } 100% { transform: translate(-50%, -50%) translateY(-6px); } }
+            .builder-card .builder-glass { animation: floatGlassCard 2.6s ease-in-out infinite alternate; }
+            .ing { position: absolute; left: 50%; top: 50%; transform: rotate(var(--angle)) translate(var(--radius, 92px)) rotate(calc(var(--angle) * -1)); text-align: center; }
+            @keyframes spinReverse { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(-360deg); } }
+            .ing-inner { display: inline-block; animation: spinReverse 20s linear infinite; transform: translate(-50%, -50%); }
+            .ing .icon { font-size: 20px; display: block; transform: translateY(0); transition: transform .25s ease; }
+            .ing .label { font-size: 11px; margin-top: 3px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.8); backdrop-filter: blur(6px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); font-weight: 600; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+            .ing:hover .icon { transform: translateY(-6px); }
+
+            /* Builder page */
+            .builder-wrap { padding: 14px 16px 100px; }
+            .stage-card { background:#fff; border-radius: 16px; box-shadow: var(--shadow); padding: 14px; }
+            .stage { position: relative; height: 420px; border-radius: 14px; background: linear-gradient(135deg,#ffe7cf,#efe3ff); overflow: hidden; }
+            .stage .glass { position:absolute; left:50%; top:50%; transform: translate(-50%,-50%); font-size:64px; filter: drop-shadow(0 10px 22px rgba(0,0,0,.12)); z-index: 2; }
+            .stage .ring { position:absolute; left:50%; top:50%; width: 330px; height:330px; margin-left:-165px; margin-top:-165px; animation: spin 20s linear infinite; z-index: 1; }
+            .stage .ing { --radius: 150px; }
+            .builder-controls { margin-top: 12px; background:#fff; border-radius: 16px; box-shadow: var(--shadow); padding: 12px; }
+            .group { margin-bottom: 8px; }
+            .group .label { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+            .chips { display:flex; flex-wrap: wrap; gap: 8px; }
+            .chip { padding: 10px 12px; border-radius: 999px; border: 2px solid #e9eef3; background:#fff; font-weight:600; font-size:13px; cursor:pointer; }
+            .chip.active { border-color: #ffc2d9; background:#fff3f8; }
 
             /* Floating Cart */
             .fab {
@@ -275,16 +314,66 @@
         <div class="app">
             <!-- Scrolling banner -->
             <div class="banner">
-                <div class="marquee">✨ Fresh mocktails all day ✨ &nbsp; ✨ Hand-shaken pastel sips ✨ &nbsp; ✨ Zero-proof, full joy ✨ &nbsp;</div>
+                <div class="marquee">✨ Fresh mocktails made with love ✨ &nbsp; ✨ Mocktail Magic ✨ &nbsp; ✨ By Arjun Mahadev ✨ &nbsp;</div>
             </div>
 
             <!-- Home / Menu View -->
             <div id="view-menu" class="view active">
                 <header>
-                    <div class="title">Mocktail Magic 🧃</div>
+                    <div class="title">Mocktail Magic</div>
                     <div class="subtitle">colorful zero-proof drinks, made with love</div>
                 </header>
                 <div class="grid" id="menu-grid"></div>
+            </div>
+
+            <!-- Builder View -->
+            <div id="view-builder" class="view">
+                <header>
+                    <div class="title">Make your own mocktail</div>
+                    <div class="subtitle">pick pearls, milk and syrups ✨</div>
+                </header>
+                <div class="builder-wrap">
+                    <div class="stage-card">
+                        <div class="stage">
+                            <div class="glass">🍹</div>
+                            <div class="ring" id="builder-ring">
+                                <!-- dynamic ring icons rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height:10px"></div>
+                    <div class="builder-controls">
+                        <div class="group">
+                            <div class="label">Boba pearls</div>
+                            <div class="chips">
+                                <button id="chip-choco" class="chip" onclick="toggleBuilderOpt('choco')">🍫 Chocolate boba</button>
+                                <button id="chip-orange" class="chip" onclick="toggleBuilderOpt('orange')">🟠 Orange boba</button>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <div class="label">Milk</div>
+                            <div class="chips">
+                                <button id="chip-milk" class="chip" onclick="toggleBuilderOpt('milk')">🥛 Add milk</button>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <div class="label">Syrups (choose up to 4)</div>
+                            <div class="chips">
+                                <button id="chip-syr-straw" class="chip" onclick="toggleBuilderSyrup('strawberry')">🍓 Strawberry</button>
+                                <button id="chip-syr-blue" class="chip" onclick="toggleBuilderSyrup('blueberry')">🫐 Blueberry</button>
+                                <button id="chip-syr-lemon" class="chip" onclick="toggleBuilderSyrup('lemon')">🍋 Lemon</button>
+                                <button id="chip-syr-mint" class="chip" onclick="toggleBuilderSyrup('mint')">🌿 Mint</button>
+                            </div>
+                        </div>
+                        <div class="mini" id="builder-summary">Base mocktail</div>
+                    </div>
+                </div>
+                <div class="sticky-cta">
+                    <div class="row" style="gap:10px">
+                        <button class="btn btn-ghost" style="flex:1" onclick="navigate('menu')">← Menu</button>
+                        <button id="builder-add-btn" class="btn btn-primary" style="flex:2; padding:14px 16px; font-size:15px;" onclick="addCustomToCart()">Add to cart • ₹80</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Checkout View -->
@@ -422,6 +511,116 @@
             const $ = sel => document.querySelector(sel);
             const $$ = sel => Array.from(document.querySelectorAll(sel));
 
+            // Builder state
+            const builderState = {
+                choco: false,
+                orange: false,
+                milk: false,
+                syrups: new Set()
+            };
+
+            function initBuilder() {
+                // reset
+                builderState.choco = false;
+                builderState.orange = false;
+                builderState.milk = false;
+                builderState.syrups = new Set();
+                ['chip-choco','chip-orange','chip-milk','chip-syr-straw','chip-syr-blue','chip-syr-lemon','chip-syr-mint']
+                  .forEach(id => document.getElementById(id)?.classList.remove('active'));
+                renderBuilderRing();
+                updateBuilderSummary();
+            }
+
+            function toggleBuilderOpt(key) {
+                builderState[key] = !builderState[key];
+                document.getElementById('chip-' + (key === 'choco' ? 'choco' : key === 'orange' ? 'orange' : 'milk'))?.classList.toggle('active', builderState[key]);
+                renderBuilderRing();
+                updateBuilderSummary();
+            }
+
+            function toggleBuilderSyrup(s) {
+                if (builderState.syrups.has(s)) {
+                    builderState.syrups.delete(s);
+                } else {
+                    if (builderState.syrups.size >= 4) { toast('Max 4 syrups'); return; }
+                    builderState.syrups.add(s);
+                }
+                const idMap = { strawberry:'chip-syr-straw', blueberry:'chip-syr-blue', lemon:'chip-syr-lemon', mint:'chip-syr-mint' };
+                document.getElementById(idMap[s])?.classList.toggle('active', builderState.syrups.has(s));
+                renderBuilderRing();
+                updateBuilderSummary();
+            }
+
+            function renderBuilderRing() {
+                const ring = document.getElementById('builder-ring');
+                if (!ring) return;
+                ring.innerHTML = '';
+                const entries = [];
+                if (builderState.choco) entries.push({ icon:'🍫', label:'Chocolate boba' });
+                if (builderState.orange) entries.push({ icon:'🟠', label:'Orange boba' });
+                if (builderState.milk) entries.push({ icon:'🥛', label:'Milk' });
+                builderState.syrups.forEach(s => {
+                    const map = { strawberry:['🍓','Strawberry'], blueberry:['🫐','Blueberry'], lemon:['🍋','Lemon'], mint:['🌿','Mint'] };
+                    const [icon, name] = map[s];
+                    entries.push({ icon, label: name + ' syrup' });
+                });
+                if (entries.length === 0) {
+                    ring.innerHTML = '<div class="ing" style="--angle:0deg;"><div class="ing-inner"><span class="icon">✨</span><span class="label">Add ingredients</span></div></div>';
+                    return;
+                }
+                const step = 360 / entries.length;
+                entries.forEach((e, i) => {
+                    const angle = i * step;
+                    const node = document.createElement('div');
+                    node.className = 'ing';
+                    node.style.setProperty('--angle', angle + 'deg');
+                    node.innerHTML = `<div class=\"ing-inner\"><span class=\"icon\">${e.icon}</span><span class=\"label\">${e.label}</span></div>`;
+                    ring.appendChild(node);
+                });
+            }
+
+            function getCustomPrice() {
+                // Base 80; each boba +20; milk +10; each syrup +10
+                let price = 80;
+                if (builderState.choco) price += 20;
+                if (builderState.orange) price += 20;
+                if (builderState.milk) price += 10;
+                price += builderState.syrups.size * 10;
+                return price;
+            }
+
+            function getCustomName() {
+                const parts = [];
+                if (builderState.choco) parts.push('choco boba');
+                if (builderState.orange) parts.push('orange boba');
+                if (builderState.milk) parts.push('milk');
+                if (builderState.syrups.size) parts.push([...builderState.syrups].join('+'));
+                const detail = parts.length ? ' (' + parts.join(', ') + ')' : '';
+                return 'Custom Mocktail' + detail;
+            }
+
+            function updateBuilderSummary() {
+                const price = getCustomPrice();
+                const name = getCustomName();
+                const summary = document.getElementById('builder-summary');
+                if (summary) summary.textContent = `${name} • ₹${price}`;
+                const btn = document.getElementById('builder-add-btn');
+                if (btn) btn.textContent = `Add to cart • ₹${price}`;
+            }
+
+            function addCustomToCart() {
+                const price = getCustomPrice();
+                const name = getCustomName();
+                const cart = getCart();
+                const id = 'custom-' + btoa(unescape(encodeURIComponent(name))).slice(0,8);
+                const existing = cart.find(i => i.id === id && i.unitPrice === price);
+                if (existing) existing.qty += 1; else cart.push({ id, qty: 1, customName: name, unitPrice: price });
+                setCart(cart);
+                updateCartBadge();
+                animateCartBadge();
+                toggleCart(true);
+            }
+
             // Splash
             window.addEventListener('load', () => {
                 setTimeout(() => { $('#splash').classList.add('hide'); }, 900);
@@ -443,6 +642,7 @@
                 $$('.view').forEach(v => v.classList.remove('active'));
                 if (view === 'menu') { $('#view-menu').classList.add('active'); }
                 if (view === 'checkout') { $('#view-checkout').classList.add('active'); }
+                if (view === 'builder') { $('#view-builder').classList.add('active'); }
                 if (view === 'success') { $('#view-success').classList.add('active'); }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -451,6 +651,25 @@
             function renderMenu() {
                 const grid = $('#menu-grid');
                 grid.innerHTML = '';
+                // Builder card
+                const builder = document.createElement('div');
+                builder.className = 'card builder-card';
+                builder.innerHTML = `
+                        <div class="thumb" style="background: var(--peach)">
+                            <div class="builder-stage">
+                                <div class="builder-glass">🍹</div>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <div class="name">Make your own mocktail</div>
+                            <div class="desc">craft your drink with pearls, milk and syrups</div>
+                            <div class="row">
+                                <div class="price">Have fun ✨</div>
+                                <button class="btn btn-ghost" onclick="navigate('builder'); initBuilder();">Start</button>
+                            </div>
+                        </div>
+                `;
+                grid.appendChild(builder);
                 DRINKS.forEach(d => {
                     const card = document.createElement('div');
                     card.className = 'card';
@@ -486,6 +705,21 @@
                 animateCartBadge();
                 updateCartBadge();
             try { if (btnEl) flyToCartFromCard(btnEl, drink.emoji); } catch {}
+            // Button "Added" micro-interaction
+            if (btnEl) {
+                const originalText = btnEl.textContent;
+                const originalWidth = btnEl.getBoundingClientRect().width + 'px';
+                btnEl.style.width = originalWidth; // prevent width jump
+                btnEl.textContent = 'Added';
+                btnEl.classList.add('added');
+                btnEl.disabled = true;
+                setTimeout(() => {
+                    btnEl.classList.remove('added');
+                    btnEl.textContent = 'Add to Cart';
+                    btnEl.style.width = '';
+                    btnEl.disabled = false;
+                }, 900);
+            }
             }
             function updateCartBadge() {
                 const cart = getCart();
@@ -592,15 +826,19 @@
                 let total = 0;
                 cart.forEach(item => {
                     const d = DRINKS.find(dr => dr.id === item.id);
-                    const line = d.price * item.qty;
+                    const unit = d ? d.price : (item.unitPrice || 0);
+                    const displayName = d ? d.name : (item.customName || 'Custom');
+                    const line = unit * item.qty;
                     total += line;
                     const row = document.createElement('div');
                     row.className = 'cart-item';
+                const thumb = d ? (d.img ? `<img src="${d.img}" alt="${displayName}" style="width:46px;height:46px;object-fit:cover;border-radius:12px;" onerror="console.error('Image failed:', this.src); this.onerror=null; var p=this.parentNode; if(p){ p.textContent='${d.emoji.replace(/'/g,"&#39;")}' }">` : d.emoji) : '✨';
+                const bg = d ? d.grad : 'linear-gradient(135deg,#ffe7cf,#efe3ff)';
                 row.innerHTML = `
-                    <div class="ci-thumb" style="background:${d.grad}">${d.img ? `<img src="${d.img}" alt="${d.name}" style="width:46px;height:46px;object-fit:cover;border-radius:12px;" onerror="console.error('Image failed:', this.src); this.onerror=null; var p=this.parentNode; if(p){ p.textContent='${d.emoji.replace(/'/g,"&#39;")}' }">` : d.emoji}</div>
+                    <div class="ci-thumb" style="background:${bg}">${thumb}</div>
                         <div class="ci-info">
-                            <div class="ci-name">${d.name}</div>
-                            <div class="ci-sub">₹${d.price} × ${item.qty}</div>
+                            <div class="ci-name">${displayName}</div>
+                            <div class="ci-sub">₹${unit} × ${item.qty}</div>
                         </div>
                         <div class="qty">
                             <button class="qty-btn" aria-label="decrease" onclick="decQty('${item.id}')">−</button>
@@ -659,7 +897,7 @@
                 let count = 0, total = 0;
                 cart.forEach(it => {
                     const d = DRINKS.find(dr => dr.id === it.id);
-                    count += it.qty; total += d.price * it.qty;
+                    count += it.qty; total += (d ? d.price : (it.unitPrice||0)) * it.qty;
                 });
                 return { count, total };
             }
@@ -674,7 +912,7 @@
                 let count = 0, total = 0;
                 cart.forEach(it => {
                     const d = DRINKS.find(dr => dr.id === it.id);
-                    count += it.qty; total += effectivePrice(d) * it.qty;
+                    count += it.qty; total += (d ? effectivePrice(d) : (it.unitPrice||0)) * it.qty;
                 });
                 return { count, total };
             }
@@ -736,8 +974,14 @@
 
                 const items = cart.map(it => {
                     const d = DRINKS.find(x => x.id === it.id);
-                    const price = effectivePrice(d);
-                    return { item: d.name.replace(/ [^ ]+$/,''), qty: it.qty, price };
+                    if (d) {
+                        const price = effectivePrice(d);
+                        return { item: d.name.replace(/ [^ ]+$/,''), qty: it.qty, price };
+                    } else {
+                        const price = it.unitPrice || 0;
+                        const name = (it.customName || 'Custom Mocktail').replace(/ [^ ]+$/,'');
+                        return { item: name, qty: it.qty, price };
+                    }
                 });
                 const total = items.reduce((a, c) => a + c.price * c.qty, 0);
                 const boba = document.getElementById('boba-toggle')?.checked || false;
