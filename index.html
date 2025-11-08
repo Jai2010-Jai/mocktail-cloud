@@ -94,6 +94,7 @@
             /* Header */
             header {
                 padding: 18px 18px 6px 18px;
+                position: relative;
             }
             .title {
                 font-size: 22px;
@@ -104,6 +105,29 @@
                 font-size: 13px;
                 color: #6a7580;
                 margin-top: 4px;
+            }
+            .header-action {
+                position: absolute;
+                top: 18px;
+                right: 18px;
+                background: rgba(255,255,255,0.8);
+                backdrop-filter: blur(8px);
+                border: 2px solid #e9eef3;
+                border-radius: 12px;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text);
+                cursor: pointer;
+                transition: all .2s ease;
+            }
+            .header-action:hover {
+                background: rgba(255,255,255,0.95);
+                border-color: var(--accent);
+                transform: translateY(-1px);
+            }
+            .header-action:active {
+                transform: translateY(0);
             }
 
             /* Menu grid */
@@ -324,6 +348,95 @@
             .soft-card { background: rgba(255,255,255,0.6); border-radius: 16px; backdrop-filter: blur(8px); padding: 10px 12px; }
             .rowc { display:flex; align-items:center; gap: 10px; }
             .muted { color: #6f7d88; }
+
+            /* Vendor Dashboard Styles */
+            .order-card {
+                background: var(--card);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow);
+                padding: 18px;
+                margin-bottom: 16px;
+                transition: transform .15s ease;
+            }
+            .order-card:active { transform: scale(0.99); }
+            .order-id {
+                font-weight: 700;
+                font-size: 14px;
+                color: var(--accent);
+                margin-bottom: 12px;
+                letter-spacing: 0.3px;
+            }
+            .order-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 14px;
+                gap: 12px;
+            }
+            .order-name {
+                font-weight: 600;
+                font-size: 16px;
+                color: var(--text);
+                flex: 1;
+            }
+            .order-time {
+                font-size: 13px;
+                color: #6a7580;
+                white-space: nowrap;
+            }
+            .order-items {
+                margin: 14px 0;
+                padding-left: 0;
+                list-style: none;
+            }
+            .order-items li {
+                padding: 6px 0;
+                font-size: 14px;
+                color: var(--text);
+                border-bottom: 1px dashed #f0f4f7;
+            }
+            .order-items li:last-child {
+                border-bottom: none;
+            }
+            .order-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-top: 14px;
+                padding-top: 14px;
+                border-top: 1px solid #f0f4f7;
+                font-size: 13px;
+            }
+            .order-meta-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .order-meta-label {
+                color: #6a7580;
+                font-weight: 500;
+            }
+            .order-meta-value {
+                color: var(--text);
+                font-weight: 600;
+            }
+            .order-total {
+                font-weight: 700;
+                font-size: 18px;
+                color: var(--text);
+                margin-top: 12px;
+                padding-top: 12px;
+                border-top: 2px solid #f0f4f7;
+            }
+            .order-notes {
+                margin-top: 12px;
+                padding: 10px 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                font-size: 13px;
+                color: #6a7580;
+                font-style: italic;
+            }
         </style>
     </head>
     <body>
@@ -371,7 +484,7 @@
                             <div class="label">Boba pearls</div>
                             <div class="chips">
                                 <button id="chip-choco" class="chip" onclick="toggleBuilderOpt('choco')">🍫 Chocolate boba</button>
-                                <button id="chip-orange" class="chip" onclick="toggleBuilderOpt('orange')">🟠 Orange boba</button>
+                                <button id="chip-mango" class="chip" onclick="toggleBuilderOpt('mango')">🥭 Mango boba</button>
                             </div>
                         </div>
                         <div class="group">
@@ -383,10 +496,16 @@
                         <div class="group">
                             <div class="label">Syrups (choose up to 4)</div>
                             <div class="chips">
-                                <button id="chip-syr-straw" class="chip" onclick="toggleBuilderSyrup('strawberry')">🍓 Strawberry</button>
-                                <button id="chip-syr-blue" class="chip" onclick="toggleBuilderSyrup('blueberry')">🫐 Blueberry</button>
-                                <button id="chip-syr-lemon" class="chip" onclick="toggleBuilderSyrup('lemon')">🍋 Lemon</button>
-                                <button id="chip-syr-mint" class="chip" onclick="toggleBuilderSyrup('mint')">🌿 Mint</button>
+                                <button id="chip-syr-green-mint" class="chip" onclick="toggleBuilderSyrup('green-mint')">🌿 Green mint syrup</button>
+                                <button id="chip-syr-blue" class="chip" onclick="toggleBuilderSyrup('blue')">💙 Blue syrup</button>
+                                <button id="chip-syr-red" class="chip" onclick="toggleBuilderSyrup('red')">❤️ Red syrup</button>
+                                <button id="chip-syr-transparent-mint" class="chip" onclick="toggleBuilderSyrup('transparent-mint')">💚 Transparent mint syrup</button>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <div class="label">Extras</div>
+                            <div class="chips">
+                                <button id="chip-mint-lemon" class="chip" onclick="toggleBuilderOpt('mintLemon')">🍋🌿 Mint lemon</button>
                             </div>
                         </div>
                         <div class="mini" id="builder-summary">Base mocktail</div>
@@ -422,10 +541,6 @@
                     <div class="field">
                         <div class="label">Name</div>
                         <input class="input" id="name" placeholder="Your name" />
-                    </div>
-                    <div class="field">
-                        <div class="label">Phone</div>
-                        <input class="input" id="phone" placeholder="10-digit phone" inputmode="numeric" />
                     </div>
                     <div class="field">
                         <div class="label">Notes (optional)</div>
@@ -472,10 +587,24 @@
             <div id="view-success" class="view">
                 <div class="success">
                     <div class="big-emoji">🎉</div>
-                    <h2>yayyy! your drink’s getting ready 🍹</h2>
+                    <h2>yayyy! your drink's getting ready 🍹</h2>
                     <p id="success-text">order #— will be ready soon!</p>
                     <div style="height:12px"></div>
                     <button class="btn btn-mint" onclick="goHome()">Order more</button>
+                </div>
+            </div>
+
+            <!-- Vendor Dashboard View -->
+            <div id="view-vendor" class="view">
+                <header>
+                    <div class="title">Vendor Dashboard</div>
+                    <div class="subtitle">live orders from customers</div>
+                    <button class="header-action" onclick="navigate('menu')" title="Back to Menu">← Menu</button>
+                </header>
+                <div class="section" id="vendor-orders-container">
+                    <div style="text-align:center; padding:60px 20px; color:#6a7580;">
+                        <div>No orders yet ☁️</div>
+                    </div>
                 </div>
             </div>
 
@@ -518,12 +647,13 @@
 
             // Data: Drinks
             const DRINKS = [
-                { id: 'sunset', name: 'Emerald Mango Bliss', desc: 'Green Mint + Mango boba', price: 80, emoji: '🌅', img: 'lemon-sparkle.png', grad: 'linear-gradient(135deg,#ffd1e6,#ffe9cf)' },
-                { id: 'blue', name: 'Blue Lagoon Mango Pop', desc: 'lemonade + blue curacao + mint', price: 80, emoji: '💧', img: 'blue-mint-boba.png', grad: 'linear-gradient(135deg,#d9f2ff,#e8fff8)' },
-                { id: 'berry', name: 'Berry Dream 🍓', desc: 'strawberry + lime + soda', price: 80, emoji: '🍓', img: 'berry-soda.png', grad: 'linear-gradient(135deg,#ffe3f0,#efe3ff)' },
-                { id: 'minty', name: 'Minty Magic 🌿', desc: 'lemon + mint + soda', price: 80, emoji: '🌿', img: 'mojito-mint.png', grad: 'linear-gradient(135deg,#d8fff1,#eafcff)' },
-                { id: 'choco-boba', name: 'Chocolate Boba 🍫', desc: 'rich cocoa + pearls', price: 120, emoji: '🍫', img: 'chocolate boba.png', grad: 'linear-gradient(135deg,#f5e6d3,#ffe0e6)' },
-                { id: 'milk-boba', name: 'Milky Boba 🧋', desc: 'classic milk tea + pearls', price: 120, emoji: '🧋', img: 'milk-boba.jpg', grad: 'linear-gradient(135deg,#f7efe6,#e8fff8)' },
+                { id: 'sunset', name: 'Minted Mango Majesty', desc: 'Green Mint', price: 70, emoji: '🌅', img: 'lemon-sparkle.png', grad: 'linear-gradient(135deg,#ffd1e6,#ffe9cf)' },
+                { id: 'blue', name: 'Azure Mirage', desc: 'lemonade + blue curacao + mint', price: 70, emoji: '💧', img: 'blue-mint-boba.png', grad: 'linear-gradient(135deg,#d9f2ff,#e8fff8)' },
+                { id: 'berry', name: 'Crimson Mango Sunset', desc: 'Red Flavour + lime + soda', price: 70, emoji: '🍓', img: 'berry-soda.png', grad: 'linear-gradient(135deg,#ffe3f0,#efe3ff)' },
+                { id: 'minty', name: 'Imperial Mango Mint Elixir', desc: 'lemon + mint + soda', price: 70, emoji: '🌿', img: 'mojito-mint.png', grad: 'linear-gradient(135deg,#d8fff1,#eafcff)' },
+                { id: 'choco-boba', name: 'Chocolate Boba 🍫', desc: 'rich cocoa + pearls', price: 99, emoji: '🍫', img: 'chocolate boba.png', grad: 'linear-gradient(135deg,#f5e6d3,#ffe0e6)' },
+                { id: 'milk-boba', name: 'Milky Boba 🧋', desc: 'classic milk tea + pearls', price: 99, emoji: '🧋', img: 'milk-boba.jpg', grad: 'linear-gradient(135deg,#f7efe6,#e8fff8)' },
+                { id: 'lime-soda', name: 'Classic Lime Soda', desc: 'fresh lime + soda', price: 60, emoji: '🍋', img: '', grad: 'linear-gradient(135deg,#e8ffd1,#fff9cf)' },
             ];
 
             // State
@@ -537,18 +667,20 @@
             // Builder state
             const builderState = {
                 choco: false,
-                orange: false,
+                mango: false,
                 milk: false,
+                mintLemon: false,
                 syrups: new Set()
             };
 
             function initBuilder() {
                 // reset
                 builderState.choco = false;
-                builderState.orange = false;
+                builderState.mango = false;
                 builderState.milk = false;
+                builderState.mintLemon = false;
                 builderState.syrups = new Set();
-                ['chip-choco','chip-orange','chip-milk','chip-syr-straw','chip-syr-blue','chip-syr-lemon','chip-syr-mint']
+                ['chip-choco','chip-mango','chip-milk','chip-mint-lemon','chip-syr-green-mint','chip-syr-blue','chip-syr-red','chip-syr-transparent-mint']
                   .forEach(id => document.getElementById(id)?.classList.remove('active'));
                 renderBuilderRing();
                 updateBuilderSummary();
@@ -556,7 +688,9 @@
 
             function toggleBuilderOpt(key) {
                 builderState[key] = !builderState[key];
-                document.getElementById('chip-' + (key === 'choco' ? 'choco' : key === 'orange' ? 'orange' : 'milk'))?.classList.toggle('active', builderState[key]);
+                let chipId = 'chip-' + key;
+                if (key === 'mintLemon') chipId = 'chip-mint-lemon';
+                document.getElementById(chipId)?.classList.toggle('active', builderState[key]);
                 renderBuilderRing();
                 updateBuilderSummary();
             }
@@ -568,7 +702,12 @@
                     if (builderState.syrups.size >= 4) { toast('Max 4 syrups'); return; }
                     builderState.syrups.add(s);
                 }
-                const idMap = { strawberry:'chip-syr-straw', blueberry:'chip-syr-blue', lemon:'chip-syr-lemon', mint:'chip-syr-mint' };
+                const idMap = { 
+                    'green-mint': 'chip-syr-green-mint', 
+                    'blue': 'chip-syr-blue', 
+                    'red': 'chip-syr-red', 
+                    'transparent-mint': 'chip-syr-transparent-mint' 
+                };
                 document.getElementById(idMap[s])?.classList.toggle('active', builderState.syrups.has(s));
                 renderBuilderRing();
                 updateBuilderSummary();
@@ -580,16 +719,22 @@
                 ring.innerHTML = '';
                 const entries = [];
                 if (builderState.choco) entries.push({ icon:'🍫', label:'Chocolate boba' });
-                if (builderState.orange) entries.push({ icon:'🟠', label:'Orange boba' });
+                if (builderState.mango) entries.push({ icon:'🥭', label:'Mango boba' });
                 if (builderState.milk) entries.push({ icon:'🥛', label:'Milk' });
+                if (builderState.mintLemon) entries.push({ icon:'🍋🌿', label:'Mint lemon' });
                 builderState.syrups.forEach(s => {
-                    const map = { strawberry:['🍓','Strawberry'], blueberry:['🫐','Blueberry'], lemon:['🍋','Lemon'], mint:['🌿','Mint'] };
-                    const [icon, name] = map[s];
+                    const map = { 
+                        'green-mint': ['🌿', 'Green mint'], 
+                        'blue': ['💙', 'Blue'], 
+                        'red': ['❤️', 'Red'], 
+                        'transparent-mint': ['💚', 'Transparent mint'] 
+                    };
+                    const [icon, name] = map[s] || ['✨', 'Syrup'];
                     entries.push({ icon, label: name + ' syrup' });
                 });
                 if (entries.length === 0) {
                     ring.innerHTML = '<div class="ing" style="--angle:0deg;"><div class="ing-inner"><span class="icon">✨</span><span class="label">Add ingredients</span></div></div>';
-                    return;
+                    return; 
                 }
                 const step = 360 / entries.length;
                 entries.forEach((e, i) => {
@@ -603,11 +748,12 @@
             }
 
             function getCustomPrice() {
-                // Base 80; each boba +20; milk +10; each syrup +10
+                // Base 80; each boba +20; milk +10; mint lemon +10; each syrup +10
                 let price = 80;
                 if (builderState.choco) price += 20;
-                if (builderState.orange) price += 20;
+                if (builderState.mango) price += 20;
                 if (builderState.milk) price += 10;
+                if (builderState.mintLemon) price += 10;
                 price += builderState.syrups.size * 10;
                 return price;
             }
@@ -615,9 +761,21 @@
             function getCustomName() {
                 const parts = [];
                 if (builderState.choco) parts.push('choco boba');
-                if (builderState.orange) parts.push('orange boba');
+                if (builderState.mango) parts.push('mango boba');
                 if (builderState.milk) parts.push('milk');
-                if (builderState.syrups.size) parts.push([...builderState.syrups].join('+'));
+                if (builderState.mintLemon) parts.push('mint lemon');
+                if (builderState.syrups.size) {
+                    const syrupNames = [...builderState.syrups].map(s => {
+                        const map = { 
+                            'green-mint': 'green mint', 
+                            'blue': 'blue', 
+                            'red': 'red', 
+                            'transparent-mint': 'transparent mint' 
+                        };
+                        return map[s] || s;
+                    });
+                    parts.push(...syrupNames);
+                }
                 const detail = parts.length ? ' (' + parts.join(', ') + ')' : '';
                 return 'Custom Mocktail' + detail;
             }
@@ -656,7 +814,14 @@
                     setCart([]);
                     sessionStorage.setItem('mm_cart_session_started', '1');
                 }
-                renderMenu();
+                
+                // Check for vendor access via URL parameter (hidden from customers)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('vendor') === 'true') {
+                    navigate('vendor');
+                } else {
+                    renderMenu();
+                }
                 updateCartBadge();
             }
 
@@ -667,6 +832,10 @@
                 if (view === 'checkout') { $('#view-checkout').classList.add('active'); }
                 if (view === 'builder') { $('#view-builder').classList.add('active'); }
                 if (view === 'success') { $('#view-success').classList.add('active'); }
+                if (view === 'vendor') { 
+                    $('#view-vendor').classList.add('active');
+                    initVendorDashboard();
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -935,8 +1104,8 @@
             function effectivePrice(drink) {
                 const boba = document.getElementById('boba-toggle')?.checked || false;
                 const isBobaItem = drink.id === 'choco-boba' || drink.id === 'milk-boba';
-                if (boba && !isBobaItem) return 100; // mocktails with boba
-                return drink.price; // base price (80 for mocktails, 120 for boba drinks)
+                if (boba && !isBobaItem) return 80; // mocktails with boba
+                return drink.price; // base price (70 for mocktails, 99 for boba drinks, 60 for lime soda)
             }
             function checkoutSummaryWithBoba() {
                 const cart = getCart();
@@ -994,10 +1163,8 @@
             // Confirm Order
         async function submitOrder() {
                 const name = $('#name').value.trim();
-                const phone = $('#phone').value.replace(/\D/g,'');
                 const notes = $('#notes').value.trim();
                 if (!name) return toast('Please enter your name');
-                if (phone.length < 10) return toast('Enter a valid 10-digit phone');
                 if (!paymentMethod) return toast('Select a payment method');
 
                 const cart = getCart();
@@ -1016,7 +1183,7 @@
                 });
                 const total = items.reduce((a, c) => a + c.price * c.qty, 0);
                 const boba = document.getElementById('boba-toggle')?.checked || false;
-                const payload = { name, phone, notes, boba, cart: items, total, payment_method: paymentMethod };
+                const payload = { name, notes, boba, cart: items, total, payment_method: paymentMethod };
 
             const btn = $('#confirm-btn');
             const originalText = btn.textContent;
@@ -1135,13 +1302,171 @@
             }
         }
 
+        // Vendor Dashboard
+        let vendorUnsubscribe = null;
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '—';
+            let date;
+            if (timestamp.toDate) {
+                date = timestamp.toDate();
+            } else if (timestamp instanceof Date) {
+                date = timestamp;
+            } else if (typeof timestamp === 'string') {
+                date = new Date(timestamp);
+            } else {
+                return '—';
+            }
+            
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+        }
+
+        function formatOrderItem(item) {
+            const name = item.item || 'Custom Mocktail';
+            const price = item.price || 0;
+            const qty = item.qty || 1;
+            return `${name} — ₹${price} × ${qty}`;
+        }
+
+        function renderVendorOrders(orders) {
+            const container = document.getElementById('vendor-orders-container');
+            if (!container) return;
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:60px 20px; color:#6a7580;">
+                        <div>No orders yet ☁️</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            orders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                
+                const orderId = order.id || '—';
+                const name = order.name || '—';
+                const time = formatTimestamp(order.createdAt);
+                const total = order.total || 0;
+                const paymentMethod = order.payment_method || '—';
+                const boba = order.boba ? 'Yes' : 'No';
+                const notes = order.notes || '';
+                const items = order.cart || [];
+
+                let itemsHtml = '';
+                if (items.length > 0) {
+                    itemsHtml = '<ul class="order-items">';
+                    items.forEach(item => {
+                        itemsHtml += `<li>${formatOrderItem(item)}</li>`;
+                    });
+                    itemsHtml += '</ul>';
+                } else {
+                    itemsHtml = '<div class="muted" style="margin:14px 0;">No items</div>';
+                }
+
+                let notesHtml = '';
+                if (notes.trim()) {
+                    notesHtml = `<div class="order-notes">${notes}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="order-id">Order #${orderId}</div>
+                    <div class="order-header">
+                        <div class="order-name">${name}</div>
+                        <div class="order-time">${time}</div>
+                    </div>
+                    ${itemsHtml}
+                    <div class="order-meta">
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Payment:</span>
+                            <span class="order-meta-value">${paymentMethod}</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Boba:</span>
+                            <span class="order-meta-value">${boba}</span>
+                        </div>
+                    </div>
+                    ${notesHtml}
+                    <div class="order-total">Total: ₹${total}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function initVendorDashboard() {
+            if (!window.firestoreDb || !window.firestoreHelpers) {
+                console.error('Firestore not initialized');
+                const container = document.getElementById('vendor-orders-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px; color:#ff6b6b;">
+                            <div>Firestore not initialized. Please refresh the page.</div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // Unsubscribe from previous listener if exists
+            if (vendorUnsubscribe) {
+                vendorUnsubscribe();
+            }
+
+            try {
+                const { collection, query, orderBy, onSnapshot } = window.firestoreHelpers;
+                const ordersRef = collection(window.firestoreDb, 'orders');
+                const q = query(ordersRef, orderBy('createdAt', 'desc'));
+
+                vendorUnsubscribe = onSnapshot(q, (snapshot) => {
+                    const orders = [];
+                    snapshot.forEach(doc => {
+                        orders.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    renderVendorOrders(orders);
+                }, (error) => {
+                    console.error('Error listening to orders:', error);
+                    const container = document.getElementById('vendor-orders-container');
+                    if (container) {
+                        container.innerHTML = `
+                            <div style="text-align:center; padding:60px 20px; color:#ff6b6b;">
+                                <div>Error loading orders</div>
+                            </div>
+                        `;
+                    }
+                });
+            } catch (error) {
+                console.error('Error setting up vendor dashboard:', error);
+                const container = document.getElementById('vendor-orders-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px; color:#ff6b6b;">
+                            <div>Error setting up dashboard</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
         
         </script>
 
     <!-- Firebase Firestore integration -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
-        import { getFirestore, addDoc, collection, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+        import { getFirestore, addDoc, collection, serverTimestamp, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
         const firebaseConfig = {
           apiKey: "AIzaSyDscdFFAQlo3oYuL1z7jdbGztWfDezXRp8",
@@ -1156,7 +1481,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Expose helper to the global scope for the main script to use
+        // Expose db and Firestore helpers to the global scope
+        window.firestoreDb = db;
+        window.firestoreHelpers = { collection, query, orderBy, onSnapshot };
         window.sendOrderToFirestore = async function(order) {
             const docRef = await addDoc(collection(db, 'orders'), {
                 ...order,
